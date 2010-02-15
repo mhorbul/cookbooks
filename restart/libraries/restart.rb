@@ -110,7 +110,7 @@ class Chef
       end
 
       def spawning_shell?
-        parent = `ps -c -o command= #{Process.ppid}`.delete("\n")
+        parent = `ps c -o command= #{Process.ppid}`.delete("\n")
         [:sh,:bash,:csh,:tcsh,:ash,:dash,:ksh,:zsh].each do |shell|
           return shell.to_s if parent =~ Regexp.new("^-?#{shell.to_s}")
         end
