@@ -47,6 +47,29 @@ node.set[:nginx][:configure_flags] = [
   "--with-http_gzip_static_module"
 ]
 
+default_ruby = `rvm list default string`.chomp
+
+if node[:nginx][:passenger][:enabled]
+  unless platform?("centos","redhat","fedora")
+    package 'libcurl4-openssl-dev' do
+      action :install
+    end
+  end
+
+  bash "install passenger with rvm" do
+    code <<-EOH
+      rvm #{default_ruby} gem install passenger -v=#{node[:nginx][:passenger][:version]} --no-rdoc --no-ri
+    EOH
+    not_if { `rvm #{default_ruby} gem list passenger`.include?(node[:nginx][:passenger][:version]) }
+  end
+
+  gem_dir = `rvm #{default_ruby} gem environment gemdir`.chomp
+  node[:nginx][:passenger][:passenger_root] = `#{gem_dir}/bin/passenger-config --root`.chomp
+  nginx_passenger_module = File.join(gem_dir, "passenger-#{node[:nginx][:passenger][:version]}/ext/nginx")
+
+  node.set[:nginx][:configure_flags] = node[:nginx][:configure_flags] << "--add-module=#{nginx_passenger_module}"
+end
+
 configure_flags = node[:nginx][:configure_flags].join(" ")
 
 remote_file "#{Chef::Config[:file_cache_path]}/nginx-#{nginx_version}.tar.gz" do
