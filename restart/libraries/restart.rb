@@ -7,9 +7,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,8 +47,8 @@ class Chef
   class Resource
     class Restart < Chef::Resource
 
-      def initialize(name, collection=nil, node=nil)
-        super(name, collection, node)
+      def initialize(name, run_context=nil)
+        super
         @resource_name = :restart
         @context = name || "node"
         @shell   = nil
@@ -136,14 +136,14 @@ class Chef
         @recipe_context.push(@run_state)
 
         incr_count()
-        
+
         if @new_resource.creates
           if ::File.exists?(@new_resource.creates)
             Chef::Log.debug("Skipping restart \##{count} in Cookbook: #{@new_resource.cookbook_name}, Recipe: #{@new_resource.recipe_name} - creates #{@new_resource.creates} exists.")
             return false
           end
         end
-        
+
         if env == count.to_s
           incr_env()
           descr = "Restart \##{count} in Cookbook: #{@new_resource.cookbook_name}, Recipe: #{@new_resource.recipe_name}"
@@ -196,7 +196,7 @@ class Chef
         eval_and_converge do
           Chef::Log.info("Cancelling pending restart, backing out...")
           @new_resource = new_resource
-          
+
           case node[:platform]
           when "debian", "ubuntu"
             bootscript_basename = "chef-restart"
@@ -228,7 +228,7 @@ class Chef
           end
 
           Chef::Log.info("Done.")
-        end 
+        end
       end
 
       def prepare_reboot!(new_resource)
@@ -250,7 +250,7 @@ class Chef
               if ::FileUtils.on_mounted_dir?(path)
                 Chef::Log.info("Cookbook path '#{path}' appears to be on a mounted volume")
                 Chef::Log.info("Cant gaurantee that this volume will be available during boot time")
-                raise "Set [:restart][:raise_on_mounted_volumes] = false to override."          
+                raise "Set [:restart][:raise_on_mounted_volumes] = false to override."
               end
             end
 
@@ -268,7 +268,7 @@ class Chef
 
             args.each do |arg|
               file = nil
-              file = arg                           if ::File.exists?(arg) 
+              file = arg                           if ::File.exists?(arg)
               file = ::File.join(FileUtils.pwd,arg)  if ::File.exists?(::File.join(::FileUtils.pwd,arg))
               if ::FileUtils.on_mounted_dir?(file)
                 Chef::Log.info("File #{f} appears to be on a mounted volume")
@@ -406,7 +406,7 @@ class Chef
           file bootscript_symlink do
             action :touch
           end
-          
+
           shell = @new_resource.shell
           cookbook_name = @new_resource.cookbook_name.to_s
           recipe_name = @new_resource.recipe_name.to_s
@@ -442,7 +442,7 @@ class Chef
           Chef::Log.info("Done.")
         end
       end
-      
+
       include Chef::Mixin::Language
       def restart!(msg="Restarting #{@new_resource.context}...")
         if @new_resource.context == "node"
