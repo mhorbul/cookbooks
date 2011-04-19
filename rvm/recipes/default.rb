@@ -52,7 +52,7 @@ bash "upgrading RVM stable" do
   only_if { node[:rvm][:track_updates] }
 end
 
-template "/etc/profile.d/rvm.sh" do
+template "/etc/profile.d/rvm-flags.sh" do
   source "rvm.sh.erb"
   owner "root"
   group "root"
