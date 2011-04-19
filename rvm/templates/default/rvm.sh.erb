@@ -1,0 +1,6 @@
+[[ -s "/usr/local/lib/rvm" ]] && source /usr/local/lib/rvm
+
+<% unless node[:rvm][:rvmrc][:rvm_trust_rvmrcs_flag].nil? %>
+export rvm_trust_rvmrcs_flag=<%= node[:rvm][:rvmrc][:rvm_trust_rvmrcs_flag] %>
+<% end %>
+
