@@ -101,3 +101,5 @@ node[:rvm][:ruby][:gems].each do |gem|
     gem_binary "#{gem_exec_cmd}"
   end
 end
+
+node.default[:rvm_exec_prefix] = system("test -e /usr/local/bin/rvm") ? "/usr/local/bin/rvm default exec" : nil 
